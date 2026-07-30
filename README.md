@@ -89,6 +89,20 @@ $env:VITE_BASE_PATH = "/band-merch-register/"
 npm.cmd run build
 ```
 
+### GitHub Pages
+
+公開URL:
+
+https://lushlifelikenightflight-hue.github.io/band-merch-register/
+
+`main`ブランチへpushすると、`.github/workflows/deploy-pages.yml`がNode.js 22で`npm ci`と`npm run build`を実行し、`dist/`をGitHub公式Pages Actionsで自動公開します。Actions画面の「Run workflow」から手動実行もできます。
+
+本番ビルドでは`VITE_BASE_PATH=/band-merch-register/`を指定します。Viteのアセット、Manifest、Service Worker、アイコン、効果音はこのbase pathから配信されます。SPAの直接アクセス用に、workflowが`dist/index.html`と同内容の`dist/404.html`を追加します。ローカル開発ではbase pathを指定しないため、従来どおり`http://localhost:5173/`で動作します。
+
+初回のみ、GitHubリポジトリの「Settings」→「Pages」→「Build and deployment」→「Source」で「GitHub Actions」を選択してください。その後、Actionsの「Deploy to GitHub Pages」が成功し、公開URLから起動・画面遷移・ホーム画面追加・オフライン再起動を確認します。
+
+Netlifyなどへ手動公開する場合は、通常どおり対象URLに合わせて`VITE_BASE_PATH`を設定し、生成された`dist/`を公開できます。GitHub Pagesへ完全移行し、独自ドメイン・Netlify固有の環境変数・リダイレクト・デプロイ履歴が不要になった時点でNetlify版を削除できます。
+
 ## 制約
 
 - データは端末・ブラウザ・公開URLごとに独立し、自動同期されません。
