@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dev-dist/
+playwright-report/
+test-results/
+coverage/
+.env.local
+*.log
+*.tsbuildinfo
