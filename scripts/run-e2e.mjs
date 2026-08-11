@@ -9,6 +9,7 @@ const playwright = new URL(
   "../node_modules/@playwright/test/cli.js",
   import.meta.url,
 ).pathname.replace(/^\/([A-Za-z]:)/, "$1");
+const previewUrl = process.env.E2E_BASE_URL ?? "http://127.0.0.1:4173";
 
 const server = spawn(node, [vite, "preview", "--host", "127.0.0.1"], {
   stdio: "inherit",
@@ -19,7 +20,7 @@ async function waitForServer() {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
     try {
-      const response = await fetch("http://127.0.0.1:4173");
+      const response = await fetch(previewUrl);
       if (response.ok) return;
     } catch {
       // The server is still starting.

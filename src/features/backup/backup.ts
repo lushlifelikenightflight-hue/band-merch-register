@@ -28,6 +28,9 @@ export function validateBackup(value: unknown): value is BackupData {
         typeof product.active === "boolean" &&
         (product.isSoldOut === undefined ||
           typeof product.isSoldOut === "boolean") &&
+        (product.stock === undefined ||
+          (Number.isSafeInteger(product.stock) &&
+            (product.stock as number) >= 0)) &&
         Number.isInteger(product.sortOrder) &&
         typeof product.presetIcon === "string" &&
         presetIcons.includes(
@@ -68,7 +71,7 @@ export function normalizeBackup(data: BackupData): NormalizedBackupData {
       {
         id: "app",
         seeded: appSetting?.seeded ?? true,
-        schemaVersion: 3,
+        schemaVersion: 4,
         soundEnabled: appSetting?.soundEnabled ?? true,
       },
     ],

@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: "prompt",
       injectRegister: false,
       manifest: {
-        name: "バンド物販レジ",
-        short_name: "物販レジ",
+        name: "StoreRegiLog+",
+        short_name: "StoreRegiLog+",
         description: "ライブ会場でオフライン利用できる物販会計アプリ",
         theme_color: "#101218",
         background_color: "#101218",

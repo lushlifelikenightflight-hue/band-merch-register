@@ -20,6 +20,7 @@ export function buildSaleItems(
             unitPrice: product.price,
             quantity,
             subtotal: product.price * quantity,
+            stockTracked: product.stock !== undefined,
           },
         ]
       : [];

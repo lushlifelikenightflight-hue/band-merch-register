@@ -209,6 +209,11 @@ h2 {
   font-size: 1.35rem;
   font-weight: 850;
 }
+.stock-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 750;
+}
 .product-image {
   width: 58px;
   height: 58px;
@@ -585,8 +590,12 @@ fieldset {
 .management-actions {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(4, 44px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
+}
+.management-actions .sold-out-action,
+.management-actions .visibility-action {
+  grid-column: span 2;
 }
 .management-actions button {
   min-width: 0;

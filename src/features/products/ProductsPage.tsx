@@ -31,6 +31,7 @@ import {
   addProductAtStart,
   db,
   saveProductOrder,
+  setProductActive,
   setProductSoldOut,
   setSoundEnabled,
 } from "../../db/database";
@@ -55,6 +56,7 @@ const iconLabels: Record<PresetIcon, string> = {
 const emptyForm = {
   name: "",
   price: "",
+  stock: "",
   presetIcon: "other" as PresetIcon,
   active: true,
   imageData: undefined as string | undefined,
@@ -67,6 +69,7 @@ interface SortableProductRowProps {
   onEdit: () => void;
   onDelete: () => void;
   onToggleSoldOut: () => void;
+  onToggleActive: () => void;
   onMove: (direction: -1 | 1) => void;
 }
 
@@ -77,6 +80,7 @@ function SortableProductRow({
   onEdit,
   onDelete,
   onToggleSoldOut,
+  onToggleActive,
   onMove,
 }: SortableProductRowProps) {
   const {
@@ -106,6 +110,7 @@ function SortableProductRow({
       <div className="grow">
         <strong>{product.name}</strong>
         <span>{formatYen(product.price)}</span>
+        <span>在庫: {product.stock ?? "-"}</span>
         <div className="product-statuses">
           <span className={`status ${product.active ? "active" : ""}`}>
             {product.active ? "表示中" : "非表示"}
@@ -125,6 +130,13 @@ function SortableProductRow({
         >
           <RotateCcw />
           {product.isSoldOut ? "販売再開" : "売り切れ"}
+        </button>
+        <button
+          className="visibility-action"
+          onClick={onToggleActive}
+          aria-label={`${product.name}を${product.active ? "非表示にする" : "表示する"}`}
+        >
+          {product.active ? "非表示にする" : "表示する"}
         </button>
         <button
           className="icon-button"
@@ -200,6 +212,7 @@ export function ProductsPage() {
       setForm({
         name: product.name,
         price: String(product.price),
+        stock: product.stock === undefined ? "" : String(product.stock),
         presetIcon: product.presetIcon,
         active: product.active,
         imageData: product.imageData,
@@ -213,9 +226,12 @@ export function ProductsPage() {
   async function saveProduct(event: React.FormEvent) {
     event.preventDefault();
     const price = Number(form.price);
+    const stock = form.stock === "" ? undefined : Number(form.stock);
     if (!form.name.trim()) return setError("商品名を入力してください。");
     if (!Number.isSafeInteger(price) || price < 0)
       return setError("価格は0円以上の整数で入力してください。");
+    if (stock !== undefined && (!Number.isSafeInteger(stock) || stock < 0))
+      return setError("在庫は0以上の整数で入力するか、空欄にしてください。");
     try {
       const now = new Date().toISOString();
       const original = editing !== "new" ? editing : null;
@@ -226,7 +242,8 @@ export function ProductsPage() {
         sortOrder: original?.sortOrder ?? 0,
         presetIcon: form.presetIcon,
         active: form.active,
-        isSoldOut: original?.isSoldOut ?? false,
+        isSoldOut: stock === 0 ? true : (original?.isSoldOut ?? false),
+        stock,
         imageData: form.imageData,
         createdAt: original?.createdAt ?? now,
         updatedAt: now,
@@ -302,6 +319,14 @@ export function ProductsPage() {
     }
   }
 
+  async function toggleActive(product: Product) {
+    try {
+      await setProductActive(product, !product.active);
+    } catch {
+      setError("表示状態を保存できませんでした。");
+    }
+  }
+
   return (
     <div className="page">
       <header className="page-header">
@@ -341,6 +366,7 @@ export function ProductsPage() {
                 onEdit={() => openForm(product)}
                 onDelete={() => setDeleting(product)}
                 onToggleSoldOut={() => void toggleSoldOut(product)}
+                onToggleActive={() => void toggleActive(product)}
                 onMove={(direction) => moveProduct(product.id, direction)}
               />
             ))}
@@ -396,6 +422,15 @@ export function ProductsPage() {
                 pattern="[0-9]*"
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
+              />
+            </label>
+            <label>
+              在庫（空欄の場合は「-」）
+              <input
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={form.stock}
+                onChange={(e) => setForm({ ...form, stock: e.target.value })}
               />
             </label>
             <fieldset>

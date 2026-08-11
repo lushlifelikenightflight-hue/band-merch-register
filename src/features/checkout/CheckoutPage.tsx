@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { CheckCircle2, Minus, Plus, Trash2 } from "lucide-react";
-import { db } from "../../db/database";
+import {
+  db,
+  deleteSaleAndRestoreStock,
+  saveSaleAndDecrementStock,
+} from "../../db/database";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ProductVisual } from "../../components/ProductVisual";
 import { formatYen, parseYen } from "../../utils/money";
@@ -58,23 +62,29 @@ export function CheckoutPage() {
   const received = parseYen(receivedText) ?? 0;
   const payment = calculatePayment(total, received);
 
-  function setQuantity(product: Product, delta: number) {
-    if (delta > 0 && product.isSoldOut) return;
+  function setQuantity(product: Product, delta: number): boolean {
     const currentQuantity = effectiveQuantities[product.id] ?? 0;
+    if (
+      delta > 0 &&
+      (product.isSoldOut ||
+        (product.stock !== undefined && currentQuantity >= product.stock))
+    )
+      return false;
+    const nextQuantity = changeQuantity(currentQuantity, delta);
     setQuantities((current) => ({
       ...current,
-      [product.id]: changeQuantity(currentQuantity, delta),
+      [product.id]: nextQuantity,
     }));
     setQuantityRevisions((current) => ({
       ...current,
       [product.id]: product.updatedAt,
     }));
+    return nextQuantity !== currentQuantity;
   }
 
   function addItem(product: Product) {
-    if (product.isSoldOut) return;
-    setQuantity(product, 1);
-    playSoundEffect("addItem", settings?.soundEnabled ?? true);
+    if (setQuantity(product, 1))
+      playSoundEffect("addItem", settings?.soundEnabled ?? true);
   }
 
   function handleReceived(value: string) {
@@ -99,9 +109,10 @@ export function CheckoutPage() {
   async function completeSale() {
     try {
       const id = crypto.randomUUID();
-      await db.sales.add({
+      const soldAt = new Date().toISOString();
+      await saveSaleAndDecrementStock({
         id,
-        soldAt: new Date().toISOString(),
+        soldAt,
         items,
         total,
         received,
@@ -114,9 +125,12 @@ export function CheckoutPage() {
       setNotice("会計を保存しました。");
       setConfirming(false);
       playSoundEffect("checkoutComplete", settings?.soundEnabled ?? true);
-    } catch {
+    } catch (cause) {
       setError(
-        "会計を保存できませんでした。端末の空き容量を確認してください。",
+        cause instanceof Error &&
+          ["INSUFFICIENT_STOCK", "PRODUCT_UNAVAILABLE"].includes(cause.message)
+          ? "在庫が足りない商品があります。商品を選び直してください。"
+          : "会計を保存できませんでした。端末の空き容量を確認してください。",
       );
     }
   }
@@ -124,7 +138,7 @@ export function CheckoutPage() {
   async function undoLastSale() {
     if (!lastSaleId) return;
     try {
-      await db.sales.delete(lastSaleId);
+      await deleteSaleAndRestoreStock(lastSaleId);
       setLastSaleId(null);
       setNotice("直前の会計を取り消しました。");
       setUndoing(false);
@@ -137,7 +151,7 @@ export function CheckoutPage() {
     <div className="page checkout-page">
       <header className="page-header">
         <div>
-          <p className="eyebrow">BAND MERCH</p>
+          <p className="eyebrow">STORE REGI</p>
           <h1>会計</h1>
         </div>
       </header>
@@ -176,13 +190,19 @@ export function CheckoutPage() {
                   className="product-card-main"
                   onClick={() => addItem(product)}
                   aria-label={`${product.name}を1点追加`}
-                  disabled={product.isSoldOut}
+                  disabled={
+                    product.isSoldOut ||
+                    (product.stock !== undefined && quantity >= product.stock)
+                  }
                 >
                   <ProductVisual product={product} />
                   <strong>{product.name}</strong>
                   <span className="product-price">
                     {formatYen(product.price)}
                   </span>
+                  {!product.isSoldOut && product.stock !== undefined && (
+                    <span className="stock-count">在庫 {product.stock}</span>
+                  )}
                   {product.isSoldOut && (
                     <span className="sold-out-badge">売り切れ</span>
                   )}
@@ -201,7 +221,10 @@ export function CheckoutPage() {
                   <button
                     onClick={() => addItem(product)}
                     aria-label={`${product.name}を1点増やす`}
-                    disabled={product.isSoldOut}
+                    disabled={
+                      product.isSoldOut ||
+                      (product.stock !== undefined && quantity >= product.stock)
+                    }
                   >
                     <Plus />
                   </button>

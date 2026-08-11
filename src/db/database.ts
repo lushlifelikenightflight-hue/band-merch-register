@@ -44,6 +44,19 @@ export class MerchDatabase extends Dexie {
             product.isSoldOut ??= false;
           });
       });
+    this.version(4)
+      .stores({
+        products: "id, sortOrder, createdAt",
+        sales: "id, soldAt",
+        settings: "id",
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<AppSettings>("settings");
+        const current = await settings.get("app");
+        if (current) {
+          await settings.put({ ...current, schemaVersion: 4 });
+        }
+      });
   }
 }
 
@@ -60,10 +73,10 @@ export async function seedDatabase(): Promise<void> {
   await db.transaction("rw", db.products, db.settings, async () => {
     const setting = await db.settings.get("app");
     if (setting?.seeded) {
-      if (setting.schemaVersion < 3 || setting.soundEnabled === undefined) {
+      if (setting.schemaVersion < 4 || setting.soundEnabled === undefined) {
         await db.settings.put({
           ...setting,
-          schemaVersion: 3,
+          schemaVersion: 4,
           soundEnabled: setting.soundEnabled ?? true,
         });
       }
@@ -84,7 +97,7 @@ export async function seedDatabase(): Promise<void> {
     await db.settings.put({
       id: "app",
       seeded: true,
-      schemaVersion: 3,
+      schemaVersion: 4,
       soundEnabled: true,
     });
   });
@@ -95,7 +108,7 @@ export async function setSoundEnabled(soundEnabled: boolean): Promise<void> {
   await db.settings.put({
     id: "app",
     seeded: current?.seeded ?? true,
-    schemaVersion: 3,
+    schemaVersion: 4,
     soundEnabled,
   });
 }
@@ -107,7 +120,61 @@ export async function setProductSoldOut(
   await db.products.put({
     ...product,
     isSoldOut,
+    stock: !isSoldOut && product.stock === 0 ? undefined : product.stock,
     updatedAt: new Date().toISOString(),
+  });
+}
+
+export async function setProductActive(
+  product: Product,
+  active: boolean,
+): Promise<void> {
+  await db.products.put({
+    ...product,
+    active,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+export async function saveSaleAndDecrementStock(sale: Sale): Promise<void> {
+  await db.transaction("rw", db.products, db.sales, async () => {
+    const changes: Product[] = [];
+    for (const item of sale.items) {
+      const product = await db.products.get(item.productId);
+      if (!product || product.isSoldOut) throw new Error("PRODUCT_UNAVAILABLE");
+      if (product.stock === undefined) continue;
+      if (product.stock < item.quantity) throw new Error("INSUFFICIENT_STOCK");
+      const stock = product.stock - item.quantity;
+      changes.push({
+        ...product,
+        stock,
+        isSoldOut: stock === 0,
+        updatedAt: sale.soldAt,
+      });
+    }
+    if (changes.length > 0) await db.products.bulkPut(changes);
+    await db.sales.add(sale);
+  });
+}
+
+export async function deleteSaleAndRestoreStock(saleId: string): Promise<void> {
+  await db.transaction("rw", db.products, db.sales, async () => {
+    const sale = await db.sales.get(saleId);
+    if (!sale) return;
+    const changes: Product[] = [];
+    for (const item of sale.items) {
+      if (!item.stockTracked) continue;
+      const product = await db.products.get(item.productId);
+      if (!product || product.stock === undefined) continue;
+      changes.push({
+        ...product,
+        stock: product.stock + item.quantity,
+        isSoldOut: product.stock === 0 ? false : product.isSoldOut,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    if (changes.length > 0) await db.products.bulkPut(changes);
+    await db.sales.delete(saleId);
   });
 }
 

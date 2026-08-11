@@ -36,6 +36,7 @@ describe("商品管理", () => {
     await user.click(screen.getByRole("button", { name: "新規" }));
     await user.type(screen.getByLabelText(/商品名/), "タオル");
     await user.type(screen.getByLabelText("価格（円）"), "2500");
+    await user.type(screen.getByLabelText(/在庫/), "5");
     await user.click(screen.getByRole("button", { name: "保存する" }));
 
     await waitFor(async () => {
@@ -47,6 +48,39 @@ describe("商品管理", () => {
         "ステッカー",
       ]);
       expect(saved.map((product) => product.sortOrder)).toEqual([0, 1, 2, 3]);
+      expect(saved[0]?.stock).toBe(5);
+    });
+  });
+
+  it("一覧から表示状態を切り替え、在庫0の商品を販売再開すると在庫未設定になる", async () => {
+    const now = new Date().toISOString();
+    await db.products.add({
+      id: "sold-out",
+      name: "完売商品",
+      price: 1000,
+      presetIcon: "other",
+      sortOrder: 0,
+      active: true,
+      isSoldOut: true,
+      stock: 0,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const user = userEvent.setup();
+    render(<ProductsPage />);
+    await user.click(
+      await screen.findByRole("button", { name: "完売商品を非表示にする" }),
+    );
+    await waitFor(async () =>
+      expect((await db.products.get("sold-out"))?.active).toBe(false),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "完売商品を販売再開" }),
+    );
+    await waitFor(async () => {
+      const product = await db.products.get("sold-out");
+      expect(product?.isSoldOut).toBe(false);
+      expect(product?.stock).toBeUndefined();
     });
   });
 
@@ -57,9 +91,12 @@ describe("商品管理", () => {
     await user.type(screen.getByLabelText(/商品名/), "タオル");
     await user.type(screen.getByLabelText("価格（円）"), "2500");
     await user.click(screen.getByRole("button", { name: "保存する" }));
-    expect(await screen.findByText("タオル")).toBeInTheDocument();
+    const editButton = await screen.findByRole("button", {
+      name: "タオルを編集",
+    });
+    expect(editButton).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "タオルを編集" }));
+    await user.click(editButton);
     const name = screen.getByLabelText(/商品名/);
     await user.clear(name);
     await user.type(name, "ツアータオル");

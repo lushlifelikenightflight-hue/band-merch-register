@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "../../db/database";
@@ -148,6 +148,38 @@ describe("会計画面", () => {
     expect(await db.sales.count()).toBe(1);
     expect(playSoundEffectMock).toHaveBeenCalledTimes(1);
     expect(playSoundEffectMock).toHaveBeenCalledWith("checkoutComplete", true);
+  });
+
+  it("在庫を表示し、会計分を減算して0で自動的に売り切れにする", async () => {
+    await db.products.update("test-shirt", { stock: 1 });
+    const user = userEvent.setup();
+    render(<CheckoutPage />);
+    expect(await screen.findByText("在庫 1")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "テストTシャツを1点追加" }),
+    );
+    expect(
+      screen.getByRole("button", { name: "テストTシャツを1点増やす" }),
+    ).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "5,000円" }));
+    await user.click(screen.getByRole("button", { name: "会計完了" }));
+    await user.click(screen.getByRole("button", { name: "会計を保存" }));
+    await waitFor(async () => {
+      const product = await db.products.get("test-shirt");
+      expect(product?.stock).toBe(0);
+      expect(product?.isSoldOut).toBe(true);
+    });
+    expect(screen.queryByText("在庫 0")).toBeNull();
+    await user.click(
+      screen.getByRole("button", { name: "直前の会計を取り消す" }),
+    );
+    await user.click(screen.getByRole("button", { name: "取り消す" }));
+    await waitFor(async () => {
+      const product = await db.products.get("test-shirt");
+      expect(product?.stock).toBe(1);
+      expect(product?.isSoldOut).toBe(false);
+    });
+    expect(await screen.findByText("在庫 1")).toBeInTheDocument();
   });
 
   it("会計保存失敗時は完了音を呼ばない", async () => {

@@ -18,6 +18,7 @@ export interface Product {
   sortOrder: number;
   active: boolean;
   isSoldOut: boolean;
+  stock?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +29,7 @@ export interface SaleItem {
   unitPrice: number;
   quantity: number;
   subtotal: number;
+  stockTracked?: boolean;
 }
 
 export interface Sale {
@@ -50,8 +52,9 @@ export type BackupAppSettings = Omit<AppSettings, "soundEnabled"> & {
   soundEnabled?: boolean;
 };
 
-export type BackupProduct = Omit<Product, "isSoldOut"> & {
+export type BackupProduct = Omit<Product, "isSoldOut" | "stock"> & {
   isSoldOut?: boolean;
+  stock?: number;
 };
 
 export interface BackupData {

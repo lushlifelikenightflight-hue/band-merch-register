@@ -5,7 +5,8 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
-  await page.goto("/");
+  await page.goto("./");
+  await expect(page).toHaveTitle("StoreRegiLog+");
   const assetStatuses = await page.evaluate(async () => {
     const paths = [
       "manifest.webmanifest",
@@ -36,6 +37,8 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
     );
     return response.json();
   });
+  expect(manifest.name).toBe("StoreRegiLog+");
+  expect(manifest.short_name).toBe("StoreRegiLog+");
   expect(manifest.icons).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
@@ -91,6 +94,7 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
   await page.getByRole("button", { name: "新規" }).click();
   await page.getByLabel(/商品名/).fill("ライブ限定バッジ");
   await page.getByLabel("価格（円）").fill("700");
+  await page.getByLabel(/在庫/).fill("1");
   await page.getByRole("button", { name: "保存する" }).click();
   await expect(page.getByText("ライブ限定バッジ")).toBeVisible();
   await expect(page.locator(".management-card").first()).toContainText(
@@ -105,6 +109,7 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
   await expect(page.locator(".product-card").first()).toContainText(
     "ライブ限定バッジ",
   );
+  await expect(page.locator(".product-card").first()).toContainText("在庫 1");
   await page.getByRole("button", { name: "ライブ限定バッジを1点追加" }).click();
   const received = page.getByRole("textbox", { name: "預かり金" });
   await page.getByRole("button", { name: "100円" }).click();
@@ -132,6 +137,10 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
   await page.getByRole("button", { name: "会計完了" }).click();
   await page.getByRole("button", { name: "会計を保存" }).click();
   await expect(page.getByText("会計を保存しました。")).toBeVisible();
+  await expect(page.locator(".product-card").first()).toContainText("売り切れ");
+  await expect(page.locator(".product-card").first()).not.toContainText(
+    "在庫 0",
+  );
 
   await page.getByRole("link", { name: "履歴" }).click();
   await expect(page.getByText("¥700", { exact: true }).first()).toBeVisible();
@@ -139,6 +148,15 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
   await expect(page.getByText("¥700", { exact: true }).first()).toBeVisible();
   await page.getByRole("link", { name: "商品" }).click();
   await expect(page.getByText("ライブ限定バッジ")).toBeVisible();
+  await expect(page.locator(".management-card").first()).toContainText(
+    "在庫: 0",
+  );
+  await page
+    .getByRole("button", { name: "ライブ限定バッジを販売再開" })
+    .click();
+  await expect(page.locator(".management-card").first()).toContainText(
+    "在庫: -",
+  );
   const soundToggle = page.getByRole("switch", { name: /効果音/ });
   await soundToggle.uncheck();
   await page.reload();

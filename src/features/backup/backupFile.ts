@@ -24,7 +24,7 @@ export async function shareOrDownloadBackup(
   ) {
     await navigator.share({
       files: [file],
-      title: "バンド物販レジ バックアップ",
+      title: "StoreRegiLog+ バックアップ",
     });
     return "shared";
   }
