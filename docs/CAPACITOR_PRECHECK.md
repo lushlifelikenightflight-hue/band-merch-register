@@ -77,7 +77,7 @@
 ## 5. Capacitor導入設計
 
 - [x] Capacitor 8.5.0とNode.js 22以上の要件を確認し、Node.js 22.23.1で導入した
-- [ ] Appleの提出要件を満たすXcodeとiOS/iPadOS SDKを確認する
+- [x] Capacitor 8の要件であるXcode 26.0以上を確認し、CIではXcode 26.3を選定した
 - [x] `@capacitor/core`、`@capacitor/cli`、`@capacitor/ios` を8.5.0へ揃えた
 - [x] `capacitor.config.ts` をBundle ID、StoreRegiLog+、`dist`で作成した
 - [x] 最低Deployment TargetをiOS/iPadOS 16.0に設定した
@@ -146,8 +146,9 @@
 
 ## 10. CI、署名、TestFlight
 
-- [ ] 利用するクラウドMacサービスを決定する
-- [ ] 対応XcodeバージョンをCIで明示的に固定または検証する
+- [x] クラウドMacとして公開リポジトリのGitHub Actions標準`macos-15` runnerを選定した
+- [x] Xcode 26.3をCIで明示的に選択し、実行時にバージョンを出力する
+- [x] CIでWebビルド、`npx cap sync ios`、署名なしSimulatorビルドを検証するワークフローを作成した
 - [ ] CIでWebビルド、`npx cap sync ios`、Xcode Archiveを再現できるようにする
 - [ ] Distribution CertificateとProvisioning Profileの管理方式を決定する
 - [ ] App Store Connect APIキーをCIの暗号化Secretへ登録する
@@ -189,6 +190,6 @@
 - [x] 導入前の復帰点がGitコミット `809e28d` に確保されている
 - [x] Native版でService Workerを無効化する実装が完了している
 - [x] バックアップ共有とハプティックに使う公式プラグインを導入済み
-- [ ] 利用するクラウドMacとXcodeバージョンの候補が決まっている
+- [x] クラウドMacをGitHub Actions `macos-15`、Xcodeを26.3に決定した
 
 ゲート通過後も、Appleのアカウント登録、契約、ストア素材、公開WebページはCapacitor実装と並行して進められる。ただし、TestFlight外部配布またはApp Review提出前には本チェックリストの該当項目を完了する。
