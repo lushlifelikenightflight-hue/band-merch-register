@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { History, Package, RefreshCw, ShoppingCart } from "lucide-react";
 import { useRegisterSW } from "virtual:pwa-register/react";
@@ -19,6 +20,16 @@ function shouldShowGuide(): boolean {
 
 export function App() {
   const [guideOpen, setGuideOpen] = useState(shouldShowGuide);
+
+  return (
+    <>
+      {!Capacitor.isNativePlatform() && <PwaUpdateBanner />}
+      <AppContent guideOpen={guideOpen} setGuideOpen={setGuideOpen} />
+    </>
+  );
+}
+
+function PwaUpdateBanner() {
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
@@ -28,6 +39,25 @@ export function App() {
     },
   });
 
+  if (!needRefresh) return null;
+
+  return (
+    <div className="update-banner" role="status">
+      <span>新しいバージョンがあります</span>
+      <button onClick={() => void updateServiceWorker(true)}>
+        <RefreshCw />
+        更新する
+      </button>
+    </div>
+  );
+}
+
+interface AppContentProps {
+  guideOpen: boolean;
+  setGuideOpen: (open: boolean) => void;
+}
+
+function AppContent({ guideOpen, setGuideOpen }: AppContentProps) {
   function dismissGuide() {
     try {
       localStorage.setItem(GUIDE_STORAGE_KEY, "true");
@@ -39,15 +69,6 @@ export function App() {
 
   return (
     <div className="app-shell">
-      {needRefresh && (
-        <div className="update-banner" role="status">
-          <span>新しいバージョンがあります</span>
-          <button onClick={() => void updateServiceWorker(true)}>
-            <RefreshCw />
-            更新する
-          </button>
-        </div>
-      )}
       <main>
         <Routes>
           <Route path="/" element={<CheckoutPage />} />

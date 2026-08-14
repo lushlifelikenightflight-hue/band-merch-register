@@ -67,38 +67,38 @@
 - [x] E2E用ViteとPlaywrightが同じURLを使い、ポート競合時に別サイトを誤検査しない構成にした
 - [x] 初回起動ガイド、アプリ情報画面、プライバシー・サポートページへの導線を実装しE2Eで確認した
 - [x] 実機としてiPhone 11（iOS 26.6）とiPad第7世代（iPadOS 18.5）を使用できる
-- [ ] Capacitor導入直前のコミットで `npm run format:check` を実行する
-- [ ] Capacitor導入直前のコミットで `npm run lint` を実行する
-- [ ] Capacitor導入直前のコミットで `npm run test` を実行する
-- [ ] Capacitor導入直前のコミットで `npm run build` を実行する
-- [ ] Capacitor導入直前のコミットで `npm run test:e2e` を実行する
-- [ ] 導入前コミットまたはタグを作成し、復帰点を確保する
+- [x] Capacitor導入直前のコミットで `npm run format:check` を実行した
+- [x] Capacitor導入直前のコミットで `npm run lint` を実行した
+- [x] Capacitor導入直前のコミットで `npm run test` を実行した
+- [x] Capacitor導入直前のコミットで `npm run build` を実行した
+- [x] Capacitor導入直前のコミットで `npm run test:e2e` を実行した
+- [x] 導入前コミット `809e28d` を作成し、復帰点を確保した
 
 ## 5. Capacitor導入設計
 
-- [ ] 導入時点のCapacitor安定版と対応Node.jsを公式文書で確認する
+- [x] Capacitor 8.5.0とNode.js 22以上の要件を確認し、Node.js 22.23.1で導入した
 - [ ] Appleの提出要件を満たすXcodeとiOS/iPadOS SDKを確認する
-- [ ] `@capacitor/core`、`@capacitor/cli`、`@capacitor/ios` のバージョンを揃える
-- [ ] `capacitor.config.ts` の `appId`、`appName`、`webDir` を決定する
-- [ ] 最低Deployment TargetをiOS/iPadOS 16.0に設定する
-- [ ] iPhoneとiPadを対応端末に設定する
+- [x] `@capacitor/core`、`@capacitor/cli`、`@capacitor/ios` を8.5.0へ揃えた
+- [x] `capacitor.config.ts` をBundle ID、StoreRegiLog+、`dist`で作成した
+- [x] 最低Deployment TargetをiOS/iPadOS 16.0に設定した
+- [x] iPhoneとiPadを対応端末に設定した（`TARGETED_DEVICE_FAMILY = "1,2"`）
 - [ ] 初回版の画面方向を縦向き基本としてXcode設定と一致させる
-- [ ] Web版とNative版を環境変数または実行環境判定で分離する
-- [ ] Native版ではPWAのService Worker登録と更新バナーを無効化する
-- [ ] Web版では現在のPWA機能を維持する
+- [x] Web版とNative版をCapacitorの実行環境判定で分離した
+- [x] Native版ではPWAのService Worker登録と更新バナーを無効化した
+- [x] Web版では現在のPWA機能を維持し、モバイルSafari相当E2Eで確認した
 - [ ] BrowserRouterのリロード、アプリ再開、深いパスでの動作をNative版で確認する
-- [ ] Safe Areaをステータスバー、Dynamic Island、ホームインジケータへ適用する
+- [x] Safe Areaをステータスバー、Dynamic Island、ホームインジケータへ適用するCSSを確認した
 - [ ] iPadの画面幅でも操作領域が過度に広がらないレイアウトを確認する
 - [ ] ソフトウェアキーボード表示時に金額入力と会計ボタンが隠れないことを確認する
 
 ## 6. ネイティブ機能
 
-- [ ] iOS共有シートを使ったバックアップ保存方式を決定する
-- [ ] 必要に応じてCapacitor Share/Filesystem系プラグインを選定する
+- [x] iOS共有シートを使ったバックアップ保存方式を実装した
+- [x] Capacitor Share 8.0.1とFilesystem 8.1.2を選定した
 - [ ] JSONファイルを「ファイル」アプリやiCloud Driveへ保存できることを確認する
 - [ ] 「ファイル」アプリからJSONバックアップを選択して復元できることを確認する
-- [ ] 会計完了時のハプティックを実装する
-- [ ] ハプティックが利用できない環境でも会計処理が失敗しないようにする
+- [x] Capacitor Haptics 8.0.2で会計完了時の成功フィードバックを実装した
+- [x] ハプティックが利用できない環境でも会計処理が失敗しないようにした
 - [ ] 商品画像の選択をシステムピッカー経由に限定し、不要な写真ライブラリ権限を要求しない
 - [ ] 使用する権限とInfo.plistのPurpose Stringを必要最小限にする
 - [ ] 外部リンクをSafariまたは適切なアプリ内ブラウザーで安全に開く
@@ -133,8 +133,8 @@
 
 ## 9. ストア素材
 
-- [ ] 1024×1024ピクセルのApp Store用アイコンを用意する
-- [ ] アイコンにアルファチャンネルや事前の角丸がないことを確認する
+- [x] 自作の1024×1024ピクセルApp Store用アイコンをiOSプロジェクトへ反映した
+- [x] App Store用アイコンにアルファチャンネルや事前の角丸がないことを確認した
 - [ ] iPhone向けスクリーンショットを作成する
 - [ ] iPad向けスクリーンショットを作成する
 - [ ] スクリーンショットに実在人物や実取引のデータを使用しない
@@ -186,9 +186,9 @@
 - [x] Bundle IDが確定している
 - [x] アイコン・効果音など既存素材の権利確認に重大な問題がない
 - [x] Web/PWA版の全チェックが成功している
-- [ ] 導入前の復帰点がGitに確保されている
-- [ ] Native版でService Workerを無効化する実装方針が決まっている
-- [ ] バックアップ共有とハプティックに使うプラグイン候補が決まっている
+- [x] 導入前の復帰点がGitコミット `809e28d` に確保されている
+- [x] Native版でService Workerを無効化する実装が完了している
+- [x] バックアップ共有とハプティックに使う公式プラグインを導入済み
 - [ ] 利用するクラウドMacとXcodeバージョンの候補が決まっている
 
 ゲート通過後も、Appleのアカウント登録、契約、ストア素材、公開WebページはCapacitor実装と並行して進められる。ただし、TestFlight外部配布またはApp Review提出前には本チェックリストの該当項目を完了する。
