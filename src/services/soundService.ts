@@ -1,42 +1,56 @@
 export type SoundEffect = "addItem" | "checkoutComplete";
 
-const SOUND_PATHS = {
-  addItem: "sounds/01_additem.mp3",
-  checkoutComplete: "sounds/02_merchandise.mp3",
-} as const satisfies Record<SoundEffect, string>;
-
-export const SOUND_VOLUME = {
-  addItem: 0.3,
-  checkoutComplete: 0.4,
-} as const satisfies Record<SoundEffect, number>;
-
-const POOL_SIZE: Record<SoundEffect, number> = {
-  addItem: 3,
-  checkoutComplete: 1,
-};
-
-const pools = new Map<SoundEffect, HTMLAudioElement[]>();
-const nextIndexes: Record<SoundEffect, number> = {
-  addItem: 0,
-  checkoutComplete: 0,
-};
-
-export function getSoundUrl(effect: SoundEffect): string {
-  return `${import.meta.env.BASE_URL}${SOUND_PATHS[effect]}`;
+interface Tone {
+  frequency: number;
+  duration: number;
+  volume: number;
 }
 
-function getPool(effect: SoundEffect): HTMLAudioElement[] {
-  const existing = pools.get(effect);
-  if (existing) return existing;
+export const SOUND_PATTERNS = {
+  addItem: [{ frequency: 660, duration: 0.06, volume: 0.09 }],
+  checkoutComplete: [
+    { frequency: 523.25, duration: 0.09, volume: 0.1 },
+    { frequency: 659.25, duration: 0.12, volume: 0.11 },
+  ],
+} as const satisfies Record<SoundEffect, readonly Tone[]>;
 
-  const pool = Array.from({ length: POOL_SIZE[effect] }, () => {
-    const audio = new Audio(getSoundUrl(effect));
-    audio.preload = "auto";
-    audio.volume = SOUND_VOLUME[effect];
-    return audio;
-  });
-  pools.set(effect, pool);
-  return pool;
+type AudioContextConstructor = new () => AudioContext;
+type AudioWindow = Window &
+  typeof globalThis & {
+    webkitAudioContext?: AudioContextConstructor;
+  };
+
+let audioContext: AudioContext | undefined;
+
+function getAudioContext(): AudioContext {
+  if (audioContext) return audioContext;
+  const audioWindow = window as AudioWindow;
+  const Context = audioWindow.AudioContext ?? audioWindow.webkitAudioContext;
+  if (!Context) throw new Error("WEB_AUDIO_UNAVAILABLE");
+  audioContext = new Context();
+  return audioContext;
+}
+
+function playPattern(context: AudioContext, effect: SoundEffect): void {
+  let startAt = context.currentTime;
+
+  for (const tone of SOUND_PATTERNS[effect]) {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const endAt = startAt + tone.duration;
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(tone.frequency, startAt);
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(tone.volume, startAt + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, endAt);
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(startAt);
+    oscillator.stop(endAt);
+    startAt = endAt + 0.025;
+  }
 }
 
 export function playSoundEffect(
@@ -46,20 +60,18 @@ export function playSoundEffect(
   if (!soundEnabled) return;
 
   try {
-    const pool = getPool(effect);
-    const availableIndex = pool.findIndex(
-      (audio) => audio.paused || audio.ended,
-    );
-    const index =
-      availableIndex >= 0 ? availableIndex : nextIndexes[effect] % pool.length;
-    nextIndexes[effect] = (index + 1) % pool.length;
-
-    const audio = pool[index];
-    audio.currentTime = 0;
-    void audio.play().catch(() => {
-      // Sound is optional feedback. Playback restrictions must not block the sale.
-    });
+    const context = getAudioContext();
+    if (context.state === "suspended") {
+      void context
+        .resume()
+        .then(() => playPattern(context, effect))
+        .catch(() => {
+          // Sound is optional feedback. Playback restrictions must not block a sale.
+        });
+      return;
+    }
+    playPattern(context, effect);
   } catch {
-    // Audio construction can fail in restricted browsers; core actions continue.
+    // Web Audio can be unavailable in restricted environments; core actions continue.
   }
 }

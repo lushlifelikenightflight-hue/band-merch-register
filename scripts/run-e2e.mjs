@@ -9,16 +9,36 @@ const playwright = new URL(
   "../node_modules/@playwright/test/cli.js",
   import.meta.url,
 ).pathname.replace(/^\/([A-Za-z]:)/, "$1");
-const previewUrl = process.env.E2E_BASE_URL ?? "http://127.0.0.1:4173";
+const previewUrl = process.env.E2E_BASE_URL ?? "http://127.0.0.1:41730";
+const preview = new URL(previewUrl);
 
-const server = spawn(node, [vite, "preview", "--host", "127.0.0.1"], {
-  stdio: "inherit",
-  windowsHide: true,
-});
+if (preview.protocol !== "http:" || !preview.port) {
+  throw new Error("E2E_BASE_URLにはポート付きのHTTP URLを指定してください。");
+}
+
+const server = spawn(
+  node,
+  [
+    vite,
+    "preview",
+    "--host",
+    preview.hostname,
+    "--port",
+    preview.port,
+    "--strictPort",
+  ],
+  {
+    stdio: "inherit",
+    windowsHide: true,
+  },
+);
 
 async function waitForServer() {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
+    if (server.exitCode !== null) {
+      throw new Error("E2E用サーバーが起動前に終了しました。");
+    }
     try {
       const response = await fetch(previewUrl);
       if (response.ok) return;
@@ -45,6 +65,7 @@ try {
     const tests = spawn(node, [playwright, "test"], {
       stdio: "inherit",
       windowsHide: true,
+      env: { ...process.env, E2E_BASE_URL: previewUrl },
     });
     tests.once("exit", (code) => resolve(code ?? 1));
     tests.once("error", reject);

@@ -1,8 +1,17 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "../../db/database";
 import { ProductsPage } from "./ProductsPage";
+
+function renderProductsPage() {
+  return render(
+    <MemoryRouter>
+      <ProductsPage />
+    </MemoryRouter>,
+  );
+}
 
 beforeEach(async () => {
   await db.products.clear();
@@ -32,7 +41,7 @@ describe("商品管理", () => {
       })),
     );
     const user = userEvent.setup();
-    render(<ProductsPage />);
+    renderProductsPage();
     await user.click(screen.getByRole("button", { name: "新規" }));
     await user.type(screen.getByLabelText(/商品名/), "タオル");
     await user.type(screen.getByLabelText("価格（円）"), "2500");
@@ -67,7 +76,7 @@ describe("商品管理", () => {
       updatedAt: now,
     });
     const user = userEvent.setup();
-    render(<ProductsPage />);
+    renderProductsPage();
     await user.click(
       await screen.findByRole("button", { name: "完売商品を非表示にする" }),
     );
@@ -86,7 +95,7 @@ describe("商品管理", () => {
 
   it("商品を登録し、編集し、削除できる", async () => {
     const user = userEvent.setup();
-    render(<ProductsPage />);
+    renderProductsPage();
     await user.click(screen.getByRole("button", { name: "新規" }));
     await user.type(screen.getByLabelText(/商品名/), "タオル");
     await user.type(screen.getByLabelText("価格（円）"), "2500");
@@ -114,7 +123,7 @@ describe("商品管理", () => {
 
   it("効果音設定をIndexedDBへ保存して再描画後も維持する", async () => {
     const user = userEvent.setup();
-    const { unmount } = render(<ProductsPage />);
+    const { unmount } = renderProductsPage();
     const toggle = await screen.findByRole("switch", { name: /効果音/ });
     expect(toggle).toBeChecked();
     await user.click(toggle);
@@ -123,7 +132,7 @@ describe("商品管理", () => {
     );
 
     unmount();
-    render(<ProductsPage />);
+    renderProductsPage();
     await waitFor(() =>
       expect(screen.getByRole("switch", { name: /効果音/ })).not.toBeChecked(),
     );
