@@ -7,14 +7,19 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
   });
   await page.goto("./");
   await expect(page).toHaveTitle("StoreRegiLog+");
+  await expect(
+    page.getByRole("heading", { name: "3ステップで会計を始められます" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "はじめる" }).click();
   const assetStatuses = await page.evaluate(async () => {
     const paths = [
       "manifest.webmanifest",
       "icons/icon-192.png",
       "icons/icon-512.png",
       "icons/apple-touch-icon.png",
-      "sounds/01_additem.mp3",
-      "sounds/02_merchandise.mp3",
+      "privacy.html",
+      "support.html",
+      "legal.css",
     ];
     return Promise.all(
       paths.map(async (path) => {
@@ -28,8 +33,9 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
     ["icons/icon-192.png", 200],
     ["icons/icon-512.png", 200],
     ["icons/apple-touch-icon.png", 200],
-    ["sounds/01_additem.mp3", 200],
-    ["sounds/02_merchandise.mp3", 200],
+    ["privacy.html", 200],
+    ["support.html", 200],
+    ["legal.css", 200],
   ]);
   const manifest = await page.evaluate(async () => {
     const response = await fetch(
@@ -161,5 +167,14 @@ test("商品登録から会計、履歴、再読み込みまで維持される",
   await soundToggle.uncheck();
   await page.reload();
   await expect(page.getByRole("switch", { name: /効果音/ })).not.toBeChecked();
+  await page.getByRole("link", { name: /アプリ情報とサポート/ }).click();
+  await expect(page.getByRole("heading", { name: "アプリ情報" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /プライバシーポリシー/ }),
+  ).toHaveAttribute("href", /privacy\.html$/);
+  await page.getByRole("button", { name: "使い方ガイドを表示" }).click();
+  await expect(
+    page.getByRole("heading", { name: "3ステップで会計を始められます" }),
+  ).toBeVisible();
   expect(consoleErrors).toEqual([]);
 });

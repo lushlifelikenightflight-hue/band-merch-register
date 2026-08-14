@@ -1,40 +1,62 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-const play = vi.fn(() => Promise.reject(new Error("blocked")));
+const start = vi.fn();
+const stop = vi.fn();
+const connect = vi.fn();
+const setValueAtTime = vi.fn();
+const exponentialRampToValueAtTime = vi.fn();
+const createOscillator = vi.fn(() => ({
+  type: "sine",
+  frequency: { setValueAtTime },
+  connect,
+  start,
+  stop,
+}));
+const createGain = vi.fn(() => ({
+  gain: { setValueAtTime, exponentialRampToValueAtTime },
+  connect,
+}));
+const resume = vi.fn(() => Promise.resolve());
 
-class MockAudio {
-  currentTime = 5;
-  paused = true;
-  ended = false;
-  preload = "";
-  volume = 1;
-  readonly src: string;
-  readonly play = play;
-
-  constructor(src: string) {
-    this.src = src;
-  }
+class MockAudioContext {
+  currentTime = 1;
+  state: AudioContextState = "running";
+  destination = {} as AudioDestinationNode;
+  createOscillator = createOscillator;
+  createGain = createGain;
+  resume = resume;
 }
 
 beforeAll(() => {
-  vi.stubGlobal("Audio", MockAudio);
+  Object.defineProperty(window, "AudioContext", {
+    configurable: true,
+    value: MockAudioContext,
+  });
+});
+
+beforeEach(() => {
+  vi.clearAllMocks();
 });
 
 describe("効果音サービス", () => {
-  it("base path付きURL、音量、巻き戻しを設定して失敗を握りつぶす", async () => {
-    const { getSoundUrl, playSoundEffect, SOUND_VOLUME } =
-      await import("./soundService");
-    expect(getSoundUrl("addItem")).toContain("sounds/01_additem.mp3");
-    expect(SOUND_VOLUME.addItem).toBe(0.3);
+  it("外部音源を使わずWeb Audioで商品追加音を生成する", async () => {
+    const { playSoundEffect, SOUND_PATTERNS } = await import("./soundService");
+    expect(SOUND_PATTERNS.addItem).toHaveLength(1);
     expect(() => playSoundEffect("addItem", true)).not.toThrow();
-    await Promise.resolve();
-    expect(play).toHaveBeenCalledOnce();
+    expect(createOscillator).toHaveBeenCalledOnce();
+    expect(start).toHaveBeenCalledOnce();
+    expect(stop).toHaveBeenCalledOnce();
   });
 
-  it("無効時は再生しない", async () => {
+  it("会計完了音を2音で生成する", async () => {
     const { playSoundEffect } = await import("./soundService");
-    play.mockClear();
+    playSoundEffect("checkoutComplete", true);
+    expect(createOscillator).toHaveBeenCalledTimes(2);
+  });
+
+  it("無効時は音を生成しない", async () => {
+    const { playSoundEffect } = await import("./soundService");
     playSoundEffect("checkoutComplete", false);
-    expect(play).not.toHaveBeenCalled();
+    expect(createOscillator).not.toHaveBeenCalled();
   });
 });

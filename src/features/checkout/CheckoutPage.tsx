@@ -10,6 +10,7 @@ import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ProductVisual } from "../../components/ProductVisual";
 import { formatYen, parseYen } from "../../utils/money";
 import { playSoundEffect } from "../../services/soundService";
+import { playCheckoutHaptic } from "../../services/hapticService";
 import type { Product } from "../../types/models";
 import {
   addYen,
@@ -125,6 +126,7 @@ export function CheckoutPage() {
       setNotice("会計を保存しました。");
       setConfirming(false);
       playSoundEffect("checkoutComplete", settings?.soundEnabled ?? true);
+      void playCheckoutHaptic();
     } catch (cause) {
       setError(
         cause instanceof Error &&

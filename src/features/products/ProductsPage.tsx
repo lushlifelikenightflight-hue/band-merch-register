@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Link } from "react-router-dom";
 import {
   closestCenter,
   DndContext,
@@ -21,6 +22,7 @@ import {
   ArrowUp,
   Download,
   GripVertical,
+  Info,
   Pencil,
   Plus,
   RotateCcw,
@@ -393,6 +395,17 @@ export function ProductsPage() {
       <section className="backup-section">
         <h2 className="section-title">データ管理</h2>
         <BackupPanel />
+      </section>
+
+      <section className="info-section">
+        <h2 className="section-title">アプリ</h2>
+        <Link className="settings-link" to="/about">
+          <Info />
+          <span>
+            <strong>アプリ情報とサポート</strong>
+            <small>使い方、プライバシー、問い合わせ先</small>
+          </span>
+        </Link>
       </section>
 
       {editing && (

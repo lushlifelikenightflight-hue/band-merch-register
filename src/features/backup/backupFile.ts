@@ -1,3 +1,6 @@
+import { Capacitor } from "@capacitor/core";
+import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import type { BackupData } from "../../types/models";
 
 export function backupFileName(date = new Date()): string {
@@ -18,6 +21,29 @@ export function createBackupFile(data: BackupData, date = new Date()): File {
 export async function shareOrDownloadBackup(
   file: File,
 ): Promise<"shared" | "downloaded"> {
+  if (Capacitor.isNativePlatform()) {
+    const path = `backups/${file.name}`;
+    const saved = await Filesystem.writeFile({
+      path,
+      data: await file.text(),
+      directory: Directory.Cache,
+      encoding: Encoding.UTF8,
+      recursive: true,
+    });
+    try {
+      await Share.share({
+        title: "StoreRegiLog+ バックアップ",
+        url: saved.uri,
+        dialogTitle: "バックアップの保存先を選択",
+      });
+      return "shared";
+    } finally {
+      await Filesystem.deleteFile({ path, directory: Directory.Cache }).catch(
+        () => undefined,
+      );
+    }
+  }
+
   if (
     typeof navigator.share === "function" &&
     navigator.canShare?.({ files: [file] })

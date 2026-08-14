@@ -243,7 +243,8 @@ h2 {
 .order-panel,
 .payment-panel,
 .settings-section,
-.backup-section {
+.backup-section,
+.info-section {
   margin-top: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -269,6 +270,25 @@ h2 {
   height: 28px;
   flex: 0 0 auto;
   accent-color: var(--accent);
+}
+.settings-link {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  text-decoration: none;
+}
+.settings-link > svg {
+  width: 24px;
+  color: var(--accent);
+}
+.settings-link > span {
+  display: grid;
+  gap: 4px;
+}
+.settings-link small {
+  color: var(--muted);
 }
 .order-list,
 .history-detail ul {
@@ -785,6 +805,112 @@ dialog {
 dialog::backdrop {
   background: #000b;
   backdrop-filter: blur(2px);
+}
+.guide-backdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: calc(20px + env(safe-area-inset-top)) 16px
+    calc(20px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background: #000c;
+  backdrop-filter: blur(5px);
+}
+.guide-dialog {
+  width: min(100%, 460px);
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 24px 70px #000b;
+}
+.guide-dialog h2 {
+  font-size: 1.55rem;
+  line-height: 1.25;
+}
+.guide-dialog ol {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0;
+  padding-left: 24px;
+}
+.guide-dialog li {
+  padding-left: 4px;
+}
+.guide-dialog li strong,
+.guide-dialog li span {
+  display: block;
+}
+.guide-dialog li span,
+.guide-note {
+  margin-top: 3px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.guide-note {
+  padding: 11px;
+  background: #ffffff09;
+  border-radius: 11px;
+}
+.about-page {
+  display: grid;
+  gap: 14px;
+}
+.about-page .page-header {
+  margin-bottom: 4px;
+}
+.back-link {
+  text-decoration: none;
+}
+.about-card,
+.about-actions {
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 17px;
+}
+.about-card {
+  display: grid;
+  gap: 10px;
+}
+.about-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.about-actions {
+  display: grid;
+  gap: 10px;
+}
+.about-actions > a,
+.about-actions > button {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  color: #fff;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.about-actions svg {
+  width: 20px;
+  flex: 0 0 auto;
+}
+.about-actions a svg:last-child:not(:first-child) {
+  margin-left: auto;
+}
+.about-footer {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
 }
 .dialog-content {
   padding: 20px;
