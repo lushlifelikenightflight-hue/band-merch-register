@@ -6,6 +6,7 @@ import {
   Shirt,
   Sparkles,
   Sticker,
+  Ticket,
   Waves,
 } from "lucide-react";
 import type { Product } from "../types/models";
@@ -17,6 +18,7 @@ const icons = {
   towel: Waves,
   keyring: KeyRound,
   camera: Camera,
+  ticket: Ticket,
   other: CircleEllipsis,
 };
 

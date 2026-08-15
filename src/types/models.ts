@@ -5,6 +5,7 @@ export const presetIcons = [
   "towel",
   "keyring",
   "camera",
+  "ticket",
   "other",
 ] as const;
 export type PresetIcon = (typeof presetIcons)[number];

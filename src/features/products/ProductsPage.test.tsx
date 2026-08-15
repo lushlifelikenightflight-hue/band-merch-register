@@ -46,6 +46,7 @@ describe("商品管理", () => {
     await user.type(screen.getByLabelText(/商品名/), "タオル");
     await user.type(screen.getByLabelText("価格（円）"), "2500");
     await user.type(screen.getByLabelText(/在庫/), "5");
+    await user.click(screen.getByRole("radio", { name: "チケット" }));
     await user.click(screen.getByRole("button", { name: "保存する" }));
 
     await waitFor(async () => {
@@ -58,6 +59,7 @@ describe("商品管理", () => {
       ]);
       expect(saved.map((product) => product.sortOrder)).toEqual([0, 1, 2, 3]);
       expect(saved[0]?.stock).toBe(5);
+      expect(saved[0]?.presetIcon).toBe("ticket");
     });
   });
 

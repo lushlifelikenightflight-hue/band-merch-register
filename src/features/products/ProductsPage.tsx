@@ -52,6 +52,7 @@ const iconLabels: Record<PresetIcon, string> = {
   towel: "タオル",
   keyring: "キーホルダー",
   camera: "チェキ",
+  ticket: "チケット",
   other: "その他",
 };
 
