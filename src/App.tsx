@@ -7,6 +7,7 @@ import { CheckoutPage } from "./features/checkout/CheckoutPage";
 import { ProductsPage } from "./features/products/ProductsPage";
 import { SalesPage } from "./features/sales/SalesPage";
 import { AboutPage } from "./features/about/AboutPage";
+import { LegalDocumentPage } from "./features/about/LegalDocumentPage";
 
 const GUIDE_STORAGE_KEY = "store-regilog-guide-dismissed";
 
@@ -77,6 +78,21 @@ function AppContent({ guideOpen, setGuideOpen }: AppContentProps) {
           <Route
             path="/about"
             element={<AboutPage onShowGuide={() => setGuideOpen(true)} />}
+          />
+          <Route
+            path="/about/privacy"
+            element={
+              <LegalDocumentPage
+                document="privacy"
+                title="プライバシーポリシー"
+              />
+            }
+          />
+          <Route
+            path="/about/support"
+            element={
+              <LegalDocumentPage document="support" title="サポート・FAQ" />
+            }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -1,7 +1,7 @@
 import {
   ArrowLeft,
   BookOpen,
-  ExternalLink,
+  ChevronRight,
   Mail,
   ShieldCheck,
 } from "lucide-react";
@@ -14,8 +14,6 @@ interface AboutPageProps {
 const supportEmail = "lushlife.like.nightflight@gmail.com";
 
 export function AboutPage({ onShowGuide }: AboutPageProps) {
-  const baseUrl = import.meta.env.BASE_URL;
-
   return (
     <div className="page about-page">
       <header className="page-header">
@@ -52,15 +50,15 @@ export function AboutPage({ onShowGuide }: AboutPageProps) {
           <BookOpen />
           使い方ガイドを表示
         </button>
-        <a href={`${baseUrl}privacy.html`} target="_blank" rel="noreferrer">
+        <Link to="/about/privacy">
           <ShieldCheck />
           プライバシーポリシー
-          <ExternalLink />
-        </a>
-        <a href={`${baseUrl}support.html`} target="_blank" rel="noreferrer">
-          <ExternalLink />
+          <ChevronRight />
+        </Link>
+        <Link to="/about/support">
+          <ChevronRight />
           サポート・FAQ
-        </a>
+        </Link>
         <a href={`mailto:${supportEmail}`}>
           <Mail />
           {supportEmail}

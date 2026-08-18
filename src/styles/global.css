@@ -912,6 +912,16 @@ dialog::backdrop {
   font-size: 0.85rem;
   text-align: center;
 }
+.legal-document-page {
+  min-height: calc(100dvh - 104px);
+}
+.legal-document-frame {
+  width: 100%;
+  min-height: calc(100dvh - 190px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 17px;
+}
 .dialog-content {
   padding: 20px;
 }
