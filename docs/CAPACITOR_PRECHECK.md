@@ -1,7 +1,7 @@
 # StoreRegiLog+ Capacitor導入前チェックリスト
 
 - 対象: App Store版 1.0.0
-- 最終更新日: 2026-08-14
+- 最終更新日: 2026-08-18
 - 正式仕様: `docs/APP_STORE_SALES_SPEC.md`
 - 目的: 既存PWAを壊さずにiPhone/iPad向けCapacitorアプリへ移行できる状態を確認する
 
@@ -19,30 +19,29 @@
 - [x] 現金会計専用とし、外部決済を初回版へ含めない
 - [x] 初回リリース機能と対象外機能を販売仕様書へ固定した
 - [x] 販売中および販売終了後最低1年間のサポート方針を固定した
-- [ ] App Store Connectで選択可能な日本向け価格ポイントに500円があることを登録時に確認する
+- [x] App Store Connectで日本向け通常価格500円を設定した
 
 ## 2. Appleアカウントと契約
 
-- [ ] 販売者本人のApple Accountを確認する
-- [x] Apple Developer Program 1年間メンバーシップの購入を申し込み、Appleの有効化待ちである
-- [ ] 村田和成（Murata Kazushige）の個人名義でApple Developer Programへ登録する
-- [ ] App Store Connectへのアクセスを確認する
-- [ ] Paid Apps Agreementへ同意する
-- [ ] 銀行口座情報を登録する
-- [ ] 日本向けの税務情報を登録する
+- [x] 販売者本人のApple Accountを確認した
+- [x] Apple Developer Program 1年間メンバーシップが有効になった
+- [x] Kazushige Murataの個人名義でApple Developer Programへ登録した
+- [x] App Store Connectへのアクセスを確認した
+- [x] Paid Apps Agreementへ同意し、有効になった
+- [x] 銀行口座情報を登録し、有効になった
+- [x] 必須の米国税務フォーム2件を提出し、有効になった
 - [ ] App Store Small Business Programの条件を確認し、必要なら申請する
-- [ ] App Store Connect APIキーを作成し、安全な場所へ保管する
-- [ ] 秘密鍵、証明書、APIキーをGitへコミットしない運用を確認する
+- [x] App Store Connect APIキーを作成し、リポジトリ外へ保管した
+- [x] 秘密鍵、証明書、APIキーをGitへコミットしない運用を確認した
 
 ## 3. 製品識別子と権利
 
-- [ ] 「StoreRegiLog+」のApp Store上の名称利用可否を確認する
+- [x] 「StoreRegiLog+」でApp Store Connectのアプリレコードを作成した
 - [ ] 商標・類似名称を確認し、第三者の権利を侵害しないことを確認する
 - [x] Bundle IDを `com.lushlifelikenightflight.storeregilog` に決定する
-- [ ] 確定したBundle IDをApple Developerへ登録する
+- [x] 確定したBundle IDをApple Developerへ登録した
   - 初回ビルドのアップロード後は安易に変更しない
-- [ ] App Store ConnectのSKUを決定する
-  - 候補: `STORE-REGILOG-IOS-001`
+- [x] App Store ConnectのSKUを `storeregilog-ios-001` に決定し登録した
 - [ ] アプリ内の製品名表記をStoreRegiLog+へ統一する
 - [x] `public/icons/` 以下の画像が販売者による自作であることを確認する
 - [x] 既存効果音2件の出所がWondershare Filmora標準オーディオライブラリであることを確認する
@@ -119,16 +118,16 @@
 
 ## 8. プライバシー・法務・サポート
 
-- [ ] 公開HTTPS URLでプライバシーポリシーを作成する
+- [x] 公開HTTPS URLでプライバシーポリシーを公開し、HTTP 200を確認した
 - [x] ローカル版プライバシーポリシーへ「外部送信なし」「端末内保存」「保存期間」「削除方法」を記載する
 - [x] アプリ内からプライバシーポリシーを容易に開けるようにする
-- [ ] App Store ConnectのApp Privacy回答を実装と照合する
-- [ ] 公開HTTPS URLでサポートページとFAQを作成する
+- [x] App Store ConnectのApp Privacyを「データの収集なし」で公開した
+- [x] 公開HTTPS URLでサポートページとFAQを公開し、HTTP 200を確認した
 - [x] アプリ内とローカル版サポートページへ問い合わせ先 `lushlife.like.nightflight@gmail.com` を掲載する
 - [x] 通常回答目安が3営業日以内であることを掲載する
 - [x] サポート対象・対象外とデータ復旧不能の範囲を掲載する
 - [x] 販売終了後最低1年間の重大不具合・OS互換性対応方針を掲載する
-- [ ] 利用規約または標準EULAを採用する方針を確認する
+- [x] Apple標準EULAを採用した
 - [ ] 日本での有料アプリ販売に必要な表示・税務・消費者保護上の確認を行う
 
 ## 9. ストア素材
@@ -138,20 +137,26 @@
 - [ ] iPhone向けスクリーンショットを作成する
 - [ ] iPad向けスクリーンショットを作成する
 - [ ] スクリーンショットに実在人物や実取引のデータを使用しない
-- [ ] アプリ名、サブタイトル、説明文、キーワードを日本語で作成する
-- [ ] 「登録不要・広告なし・月額なし・完全オフライン・買い切り」を正確に説明する
-- [ ] 非対応機能を提供しているように見える表現を使用しない
-- [ ] サポートURLとプライバシーポリシーURLを登録する
-- [ ] 年齢レーティング、カテゴリ、著作権表示を決定する
+- [x] アプリ名、サブタイトル、説明文、キーワードを日本語で作成し保存した
+- [x] 「登録不要・広告なし・月額なし・完全オフライン・買い切り」を正確に説明した
+- [x] 非対応機能を提供しているように見える表現を避けた
+- [x] サポートURLとプライバシーポリシーURLを登録した
+- [x] 年齢レーティング4+、カテゴリ、著作権表示を決定した
 
 ## 10. CI、署名、TestFlight
 
 - [x] クラウドMacとして公開リポジトリのGitHub Actions標準`macos-15` runnerを選定した
 - [x] Xcode 26.3をCIで明示的に選択し、実行時にバージョンを出力する
 - [x] CIでWebビルド、`npx cap sync ios`、署名なしSimulatorビルドを検証するワークフローを作成した
-- [ ] CIでWebビルド、`npx cap sync ios`、Xcode Archiveを再現できるようにする
-- [ ] Distribution CertificateとProvisioning Profileの管理方式を決定する
-- [ ] App Store Connect APIキーをCIの暗号化Secretへ登録する
+- [x] 手動実行専用のTestFlightワークフローでWebビルド、`npx cap sync ios`、署名付きXcode Archiveを行う構成を追加した
+- [x] Distribution CertificateとProvisioning Profileを暗号化SecretでCIへ渡す方式に決定した
+  - `APP_STORE_CONNECT_KEY_ID`
+  - `APP_STORE_CONNECT_ISSUER_ID`
+  - `APP_STORE_CONNECT_API_KEY_BASE64`
+  - `IOS_DISTRIBUTION_CERTIFICATE_BASE64`
+  - `IOS_DISTRIBUTION_CERTIFICATE_PASSWORD`
+  - `IOS_PROVISIONING_PROFILE_BASE64`
+- [x] App Store Connect APIキー、署名証明書、Provisioning ProfileをCIの暗号化Secretへ登録した
 - [ ] Secretがログ、成果物、Pull Requestへ出力されないことを確認する
 - [ ] 署名済みビルドをApp Store Connectへアップロードする
 - [ ] TestFlightでiPhone 11へインストールする
