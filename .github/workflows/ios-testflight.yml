@@ -77,12 +77,28 @@ jobs:
           KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
           API_KEY_DIRECTORY="$HOME/.appstoreconnect/private_keys"
           API_KEY_PATH="$API_KEY_DIRECTORY/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          EXPECTED_CERTIFICATE_SHA256="0E5B39D16166E76D8B3AC36A44CD054B0E58BF6BAAFCE9B0DA5E9B50BC6EA7C5"
 
           printf '%s' "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" | base64 -D > "$CERTIFICATE_PATH"
           printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | base64 -D > "$PROFILE_PATH"
           mkdir -p "$API_KEY_DIRECTORY"
           printf '%s' "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 -D > "$API_KEY_PATH"
           chmod 600 "$API_KEY_PATH"
+
+          ACTUAL_CERTIFICATE_SHA256="$(shasum -a 256 "$CERTIFICATE_PATH" | awk '{ print toupper($1) }')"
+          echo "Decoded distribution certificate SHA-256: $ACTUAL_CERTIFICATE_SHA256"
+          if [[ "$ACTUAL_CERTIFICATE_SHA256" != "$EXPECTED_CERTIFICATE_SHA256" ]]; then
+            echo 'Decoded distribution certificate does not match the locally verified p12.' >&2
+            exit 1
+          fi
+          if ! openssl pkcs12 \
+            -in "$CERTIFICATE_PATH" \
+            -noout \
+            -passin env:IOS_DISTRIBUTION_CERTIFICATE_PASSWORD; then
+            echo 'OpenSSL could not validate the decoded p12 with the stored password.' >&2
+            exit 1
+          fi
+          echo 'Decoded p12 and stored password were validated by OpenSSL.'
 
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
