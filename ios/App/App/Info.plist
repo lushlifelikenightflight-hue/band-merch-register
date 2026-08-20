@@ -26,6 +26,10 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>商品画像をカメラで撮影して登録するために使用します。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>フォトライブラリから商品画像を選んで登録するために使用します。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
