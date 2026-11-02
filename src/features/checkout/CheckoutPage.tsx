@@ -5,13 +5,18 @@ import {
   db,
   deleteSaleAndRestoreStock,
   saveSaleAndDecrementStock,
+  setCheckoutColumns,
 } from "../../db/database";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ProductVisual } from "../../components/ProductVisual";
 import { formatYen, parseYen } from "../../utils/money";
 import { playSoundEffect } from "../../services/soundService";
 import { playCheckoutHaptic } from "../../services/hapticService";
-import type { Product } from "../../types/models";
+import {
+  checkoutColumnCounts,
+  type CheckoutColumnCount,
+  type Product,
+} from "../../types/models";
 import {
   addYen,
   buildSaleItems,
@@ -41,6 +46,15 @@ export function CheckoutPage() {
   const [undoing, setUndoing] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [checkoutColumnsOverride, setCheckoutColumnsOverride] =
+    useState<CheckoutColumnCount | null>(null);
+
+  const defaultCheckoutColumns: CheckoutColumnCount =
+    typeof window !== "undefined" && window.innerWidth >= 620 ? 3 : 2;
+  const checkoutColumns =
+    checkoutColumnsOverride ??
+    settings?.checkoutColumns ??
+    defaultCheckoutColumns;
 
   const effectiveQuantities = useMemo(
     () =>
@@ -105,6 +119,19 @@ export function CheckoutPage() {
     }
     setReceivedText(String(next));
     setError("");
+  }
+
+  async function updateCheckoutColumns(value: string) {
+    const checkoutColumns = Number(value) as CheckoutColumnCount;
+    if (!checkoutColumnCounts.includes(checkoutColumns)) return;
+    setCheckoutColumnsOverride(checkoutColumns);
+    try {
+      await setCheckoutColumns(checkoutColumns);
+      setError("");
+    } catch {
+      setCheckoutColumnsOverride(null);
+      setError("表示列数を保存できませんでした。もう一度お試しください。");
+    }
   }
 
   async function completeSale() {
@@ -175,10 +202,28 @@ export function CheckoutPage() {
       )}
 
       <section aria-labelledby="products-heading">
-        <h2 id="products-heading" className="section-title">
-          商品を選択
-        </h2>
-        <div className="product-grid">
+        <div className="product-section-header">
+          <h2 id="products-heading" className="section-title">
+            商品を選択
+          </h2>
+          <label className="column-selector">
+            <span>表示列数</span>
+            <select
+              aria-label="商品カードの表示列数"
+              value={checkoutColumns}
+              onChange={(event) =>
+                void updateCheckoutColumns(event.target.value)
+              }
+            >
+              {checkoutColumnCounts.map((columns) => (
+                <option key={columns} value={columns}>
+                  {columns}列
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="product-grid" data-columns={checkoutColumns}>
           {products.map((product) => {
             const quantity = effectiveQuantities[product.id] ?? 0;
             return (

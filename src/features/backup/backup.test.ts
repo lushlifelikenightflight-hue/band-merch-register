@@ -19,7 +19,7 @@ describe("バックアップ検証", () => {
     expect(validateBackup({ format: "other", products: [] })).toBe(false);
   });
 
-  it("旧バックアップの効果音設定をオンで補完する", () => {
+  it("旧バックアップの効果音を補完し、列数は未設定のまま保つ", () => {
     const legacy = {
       format: "band-merch-register" as const,
       version: 1 as const,
@@ -30,6 +30,47 @@ describe("バックアップ検証", () => {
     };
     expect(validateBackup(legacy)).toBe(true);
     expect(normalizeBackup(legacy).settings[0]?.soundEnabled).toBe(true);
+    expect(
+      normalizeBackup(legacy).settings[0]?.checkoutColumns,
+    ).toBeUndefined();
+  });
+
+  it("表示列数は2～5だけを受け付ける", () => {
+    const base = {
+      format: "band-merch-register",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      products: [],
+      sales: [],
+    };
+    expect(
+      validateBackup({
+        ...base,
+        settings: [
+          {
+            id: "app",
+            seeded: true,
+            schemaVersion: 5,
+            soundEnabled: true,
+            checkoutColumns: 5,
+          },
+        ],
+      }),
+    ).toBe(true);
+    expect(
+      validateBackup({
+        ...base,
+        settings: [
+          {
+            id: "app",
+            seeded: true,
+            schemaVersion: 5,
+            soundEnabled: true,
+            checkoutColumns: 6,
+          },
+        ],
+      }),
+    ).toBe(false);
   });
 
   it("在庫は省略または0以上の整数だけを受け付ける", () => {

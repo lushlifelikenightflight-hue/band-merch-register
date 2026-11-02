@@ -37,6 +37,48 @@ beforeEach(async () => {
 });
 
 describe("会計画面", () => {
+  it("列数未設定のスマホ幅では従来どおり2列にする", async () => {
+    const originalInnerWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 375,
+    });
+    try {
+      render(<CheckoutPage />);
+      expect(
+        await screen.findByRole("combobox", {
+          name: "商品カードの表示列数",
+        }),
+      ).toHaveValue("2");
+    } finally {
+      Object.defineProperty(window, "innerWidth", {
+        configurable: true,
+        value: originalInnerWidth,
+      });
+    }
+  });
+
+  it("商品カードの表示列数を2～5列から選び、設定を保存する", async () => {
+    const user = userEvent.setup();
+    render(<CheckoutPage />);
+    const selector = await screen.findByRole("combobox", {
+      name: "商品カードの表示列数",
+    });
+    const productGrid = (await screen.findByText("テストTシャツ")).closest(
+      ".product-grid",
+    );
+    expect(selector).toHaveValue("3");
+    expect(productGrid).toHaveAttribute("data-columns", "3");
+
+    await user.selectOptions(selector, "5");
+
+    expect(selector).toHaveValue("5");
+    expect(productGrid).toHaveAttribute("data-columns", "5");
+    await waitFor(async () =>
+      expect((await db.settings.get("app"))?.checkoutColumns).toBe(5),
+    );
+  });
+
   it("指定金額を加算し、ちょうどと消去を安全に処理する", async () => {
     const user = userEvent.setup();
     render(<CheckoutPage />);

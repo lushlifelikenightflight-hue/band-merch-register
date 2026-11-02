@@ -1,5 +1,10 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { AppSettings, Product, Sale } from "../types/models";
+import type {
+  AppSettings,
+  CheckoutColumnCount,
+  Product,
+  Sale,
+} from "../types/models";
 
 export class MerchDatabase extends Dexie {
   products!: EntityTable<Product, "id">;
@@ -57,6 +62,19 @@ export class MerchDatabase extends Dexie {
           await settings.put({ ...current, schemaVersion: 4 });
         }
       });
+    this.version(5)
+      .stores({
+        products: "id, sortOrder, createdAt",
+        sales: "id, soldAt",
+        settings: "id",
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<AppSettings>("settings");
+        const current = await settings.get("app");
+        if (current) {
+          await settings.put({ ...current, schemaVersion: 5 });
+        }
+      });
   }
 }
 
@@ -73,10 +91,10 @@ export async function seedDatabase(): Promise<void> {
   await db.transaction("rw", db.products, db.settings, async () => {
     const setting = await db.settings.get("app");
     if (setting?.seeded) {
-      if (setting.schemaVersion < 4 || setting.soundEnabled === undefined) {
+      if (setting.schemaVersion < 5 || setting.soundEnabled === undefined) {
         await db.settings.put({
           ...setting,
-          schemaVersion: 4,
+          schemaVersion: 5,
           soundEnabled: setting.soundEnabled ?? true,
         });
       }
@@ -97,7 +115,7 @@ export async function seedDatabase(): Promise<void> {
     await db.settings.put({
       id: "app",
       seeded: true,
-      schemaVersion: 4,
+      schemaVersion: 5,
       soundEnabled: true,
     });
   });
@@ -108,8 +126,22 @@ export async function setSoundEnabled(soundEnabled: boolean): Promise<void> {
   await db.settings.put({
     id: "app",
     seeded: current?.seeded ?? true,
-    schemaVersion: 4,
+    schemaVersion: 5,
     soundEnabled,
+    checkoutColumns: current?.checkoutColumns,
+  });
+}
+
+export async function setCheckoutColumns(
+  checkoutColumns: CheckoutColumnCount,
+): Promise<void> {
+  const current = await db.settings.get("app");
+  await db.settings.put({
+    id: "app",
+    seeded: current?.seeded ?? true,
+    schemaVersion: 5,
+    soundEnabled: current?.soundEnabled ?? true,
+    checkoutColumns,
   });
 }
 

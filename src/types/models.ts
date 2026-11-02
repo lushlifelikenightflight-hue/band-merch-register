@@ -10,6 +10,9 @@ export const presetIcons = [
 ] as const;
 export type PresetIcon = (typeof presetIcons)[number];
 
+export const checkoutColumnCounts = [2, 3, 4, 5] as const;
+export type CheckoutColumnCount = (typeof checkoutColumnCounts)[number];
+
 export interface Product {
   id: string;
   name: string;
@@ -47,10 +50,15 @@ export interface AppSettings {
   seeded: boolean;
   schemaVersion: number;
   soundEnabled: boolean;
+  checkoutColumns?: CheckoutColumnCount;
 }
 
-export type BackupAppSettings = Omit<AppSettings, "soundEnabled"> & {
+export type BackupAppSettings = Omit<
+  AppSettings,
+  "soundEnabled" | "checkoutColumns"
+> & {
   soundEnabled?: boolean;
+  checkoutColumns?: CheckoutColumnCount;
 };
 
 export type BackupProduct = Omit<Product, "isSoldOut" | "stock"> & {

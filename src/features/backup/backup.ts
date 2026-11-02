@@ -1,5 +1,5 @@
 import type { BackupData, NormalizedBackupData } from "../../types/models";
-import { presetIcons } from "../../types/models";
+import { checkoutColumnCounts, presetIcons } from "../../types/models";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -54,7 +54,11 @@ export function validateBackup(value: unknown): value is BackupData {
         typeof setting.seeded === "boolean" &&
         Number.isSafeInteger(setting.schemaVersion) &&
         (setting.soundEnabled === undefined ||
-          typeof setting.soundEnabled === "boolean"),
+          typeof setting.soundEnabled === "boolean") &&
+        (setting.checkoutColumns === undefined ||
+          checkoutColumnCounts.includes(
+            setting.checkoutColumns as (typeof checkoutColumnCounts)[number],
+          )),
     )
   );
 }
@@ -71,8 +75,9 @@ export function normalizeBackup(data: BackupData): NormalizedBackupData {
       {
         id: "app",
         seeded: appSetting?.seeded ?? true,
-        schemaVersion: 4,
+        schemaVersion: 5,
         soundEnabled: appSetting?.soundEnabled ?? true,
+        checkoutColumns: appSetting?.checkoutColumns,
       },
     ],
   };
