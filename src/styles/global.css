@@ -216,51 +216,96 @@ h2 {
 .product-grid[data-columns="5"] {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
-.product-grid[data-columns="4"],
+.product-grid[data-columns="4"] {
+  gap: 8px;
+}
 .product-grid[data-columns="5"] {
   gap: 6px;
 }
-.product-grid[data-columns="4"] .product-card-main,
+.product-grid[data-columns="4"] .product-card-main {
+  min-height: 160px;
+  align-items: center;
+  gap: 5px;
+  padding: 10px;
+  text-align: center;
+}
+.product-grid[data-columns="4"] .product-card-main > svg {
+  width: 64px;
+  height: 64px;
+}
+.product-grid[data-columns="4"] .product-image {
+  width: 100%;
+  max-width: 96px;
+  height: auto;
+  aspect-ratio: 1;
+  align-self: center;
+  border-radius: 12px;
+  object-fit: cover;
+}
+.product-grid[data-columns="4"] .product-card-main > strong {
+  font-size: 0.9rem;
+}
+.product-grid[data-columns="4"] .product-price {
+  font-size: 1.05rem;
+}
+.product-grid[data-columns="4"] .stock-count {
+  font-size: 0.75rem;
+}
+.product-grid[data-columns="4"] .quantity-controls {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.product-grid[data-columns="4"] .quantity-controls button {
+  min-width: 0;
+  height: 44px;
+}
+.product-grid[data-columns="4"] .quantity-controls svg {
+  width: 18px;
+  height: 18px;
+}
+.product-grid[data-columns="4"] .quantity-controls output {
+  font-size: 1rem;
+}
 .product-grid[data-columns="5"] .product-card-main {
   min-height: 116px;
   gap: 4px;
   padding: 8px;
 }
-.product-grid[data-columns="4"] .product-image,
 .product-grid[data-columns="5"] .product-image {
   width: 38px;
   height: 38px;
   border-radius: 9px;
 }
-.product-grid[data-columns="4"] .product-card-main > strong,
 .product-grid[data-columns="5"] .product-card-main > strong {
   font-size: 0.82rem;
 }
-.product-grid[data-columns="4"] .product-price,
 .product-grid[data-columns="5"] .product-price {
   font-size: 0.95rem;
 }
-.product-grid[data-columns="4"] .stock-count,
 .product-grid[data-columns="5"] .stock-count {
   font-size: 0.7rem;
 }
-.product-grid[data-columns="4"] .quantity-controls,
 .product-grid[data-columns="5"] .quantity-controls {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-.product-grid[data-columns="4"] .quantity-controls button,
 .product-grid[data-columns="5"] .quantity-controls button {
   min-width: 0;
   height: 40px;
 }
-.product-grid[data-columns="4"] .quantity-controls svg,
 .product-grid[data-columns="5"] .quantity-controls svg {
   width: 16px;
   height: 16px;
 }
-.product-grid[data-columns="4"] .quantity-controls output,
 .product-grid[data-columns="5"] .quantity-controls output {
   font-size: 0.9rem;
+}
+.product-grid[data-columns="4"] .product-card,
+.product-grid[data-columns="5"] .product-card {
+  display: flex;
+  flex-direction: column;
+}
+.product-grid[data-columns="4"] .product-card-main,
+.product-grid[data-columns="5"] .product-card-main {
+  flex: 1;
 }
 .product-card {
   overflow: hidden;
