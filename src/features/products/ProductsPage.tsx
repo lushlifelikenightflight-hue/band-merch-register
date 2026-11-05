@@ -39,10 +39,14 @@ import {
 } from "../../db/database";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ProductVisual } from "../../components/ProductVisual";
-import { compressImage } from "../../services/imageService";
+import {
+  cropSquareImage,
+  type SquareCropSettings,
+} from "../../services/imageService";
 import { formatYen } from "../../utils/money";
 import { presetIcons, type PresetIcon, type Product } from "../../types/models";
 import { BackupPanel } from "../backup/BackupPanel";
+import { ImageCropDialog } from "./ImageCropDialog";
 import { reorderProducts } from "./productOrder";
 
 const iconLabels: Record<PresetIcon, string> = {
@@ -64,6 +68,11 @@ const emptyForm = {
   active: true,
   imageData: undefined as string | undefined,
 };
+
+interface PendingImage {
+  file: File;
+  previewUrl: string;
+}
 
 interface SortableProductRowProps {
   product: Product;
@@ -196,6 +205,7 @@ export function ProductsPage() {
   const [editing, setEditing] = useState<Product | null | "new">(null);
   const [form, setForm] = useState(emptyForm);
   const [deleting, setDeleting] = useState<Product | null>(null);
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [error, setError] = useState("");
   const [soundEnabledOverride, setSoundEnabledOverride] = useState<
     boolean | null
@@ -209,6 +219,7 @@ export function ProductsPage() {
   );
 
   function openForm(product?: Product) {
+    closeImageEditor();
     setError("");
     if (product) {
       setEditing(product);
@@ -224,6 +235,18 @@ export function ProductsPage() {
       setEditing("new");
       setForm({ ...emptyForm });
     }
+  }
+
+  function closeImageEditor() {
+    setPendingImage((current) => {
+      if (current) URL.revokeObjectURL(current.previewUrl);
+      return null;
+    });
+  }
+
+  function closeForm() {
+    closeImageEditor();
+    setEditing(null);
   }
 
   async function saveProduct(event: React.FormEvent) {
@@ -253,7 +276,7 @@ export function ProductsPage() {
       };
       if (original) await db.products.put(product);
       else await addProductAtStart(product);
-      setEditing(null);
+      closeForm();
     } catch {
       setError(
         "商品を保存できませんでした。端末の空き容量を確認してください。",
@@ -261,15 +284,22 @@ export function ProductsPage() {
     }
   }
 
-  async function handleImage(file?: File) {
+  function handleImage(file?: File) {
     if (!file) return;
     setError("");
-    try {
-      const imageData = await compressImage(file);
-      setForm((current) => ({ ...current, imageData }));
-    } catch {
-      setError("画像を読み込めませんでした。別の画像を選択してください。");
+    if (!file.type.startsWith("image/")) {
+      setError("画像ファイルを選択してください。");
+      return;
     }
+    closeImageEditor();
+    setPendingImage({ file, previewUrl: URL.createObjectURL(file) });
+  }
+
+  async function applyImageCrop(settings: SquareCropSettings) {
+    if (!pendingImage) return;
+    const imageData = await cropSquareImage(pendingImage.file, settings);
+    setForm((current) => ({ ...current, imageData }));
+    closeImageEditor();
   }
 
   async function deleteProduct() {
@@ -417,7 +447,7 @@ export function ProductsPage() {
               <button
                 type="button"
                 className="secondary compact"
-                onClick={() => setEditing(null)}
+                onClick={closeForm}
               >
                 閉じる
               </button>
@@ -476,7 +506,10 @@ export function ProductsPage() {
                 ref={fileRef}
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleImage(e.target.files?.[0])}
+                onChange={(event) => {
+                  handleImage(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
               />
             </label>
             {form.imageData && (
@@ -504,6 +537,14 @@ export function ProductsPage() {
             </button>
           </form>
         </div>
+      )}
+
+      {pendingImage && (
+        <ImageCropDialog
+          previewUrl={pendingImage.previewUrl}
+          onApply={applyImageCrop}
+          onCancel={closeImageEditor}
+        />
       )}
 
       <ConfirmDialog
