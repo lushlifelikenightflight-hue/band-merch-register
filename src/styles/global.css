@@ -1284,13 +1284,13 @@ dialog::backdrop {
     padding: clamp(12px, 1.5vw, 16px) 12px 12px;
   }
 
-  .product-grid[data-columns="4"] .product-card-main > svg {
-    width: clamp(80px, 11vw, 112px);
-    height: clamp(80px, 11vw, 112px);
+  .product-grid[data-columns="4"] .product-card-main > svg,
+  .product-grid[data-columns="4"] .product-image {
+    width: clamp(96px, 14vw, 144px);
+    height: clamp(96px, 14vw, 144px);
   }
 
   .product-grid[data-columns="4"] .product-image {
-    width: clamp(96px, 14vw, 144px);
     max-width: none;
   }
 
@@ -1310,7 +1310,7 @@ dialog::backdrop {
   }
 
   .product-grid[data-columns="4"] .product-price {
-    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-size: clamp(1.1rem, 2.2vw, 1.45rem);
   }
 
   .product-grid[data-columns="4"] .stock-count {
