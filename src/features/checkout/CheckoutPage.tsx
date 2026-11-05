@@ -244,15 +244,17 @@ export function CheckoutPage() {
                 >
                   <ProductVisual product={product} />
                   <strong>{product.name}</strong>
-                  <span className="product-price">
-                    {formatYen(product.price)}
+                  <span className="product-meta">
+                    <span className="product-price">
+                      {formatYen(product.price)}
+                    </span>
+                    {!product.isSoldOut && product.stock !== undefined && (
+                      <span className="stock-count">在庫 {product.stock}</span>
+                    )}
+                    {product.isSoldOut && (
+                      <span className="sold-out-badge">売り切れ</span>
+                    )}
                   </span>
-                  {!product.isSoldOut && product.stock !== undefined && (
-                    <span className="stock-count">在庫 {product.stock}</span>
-                  )}
-                  {product.isSoldOut && (
-                    <span className="sold-out-badge">売り切れ</span>
-                  )}
                 </button>
                 <div className="quantity-controls">
                   <button
